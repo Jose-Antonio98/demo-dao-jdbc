@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import edu.joseph.model.Department;
 
 
-class DemoDaoJdbcApplicationTests {
+class DepartmentTests {
 
 	@Test
 	void myDepartment() {
