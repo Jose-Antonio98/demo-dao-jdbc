@@ -12,5 +12,5 @@ public interface DaoInterface {
 	void deleteById(Integer id);
 	Object findById(Integer id);
 	List<Seller> findByDepartment(Department dept);
-	List<Object> findAll();
+	List<Seller> findAll();
 }
