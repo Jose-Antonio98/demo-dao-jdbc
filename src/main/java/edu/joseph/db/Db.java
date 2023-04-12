@@ -16,7 +16,7 @@ public class Db {
 
 	// pega propriedades de login, senha e link do banco de dados
 	private static Properties loadProperties() {
-		try (var fs = new FileInputStream("Db.properties")) {
+		try (var fs = new FileInputStream("C:\\Users\\josea\\OneDrive\\Documentos\\WorkSpace java\\demo-dao-jdbc\\demo-dao-jdbc\\src\\main\\resources\\application.properties")) {
 			var props = new Properties();
 			props.load(fs);
 			return props;

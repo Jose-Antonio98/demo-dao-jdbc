@@ -7,6 +7,6 @@ public interface DaoInterface {
 	void insert (Object obj);
 	void update(Object obj);
 	void deleteById(Integer id);
-	void findById(Integer id);
+	Object findById(Integer id);
 	List<Object> findAll();
 }
