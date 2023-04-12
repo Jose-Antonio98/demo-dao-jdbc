@@ -55,12 +55,9 @@ public class SellerDaoJDBC implements DaoInterface {
 			if (rs.next()) {
 				// instancia o objeto department pegando os itens contidos cons colunas e linhas
 				// do objeto rs
-				var dep = new Department();
-				dep.setId(rs.getInt("DepartmentId"));
-				dep.setName(rs.getString("DepName"));
-
-				var obj = new Seller(rs.getInt("Id"), rs.getString("Name"), rs.getString("Email"),
-						rs.getDate("BirthDate"), rs.getDouble("BaseSalary"), dep);
+				var dep = instantiatiateDepartment(rs);
+				
+				var obj = instantiatiateSeller(rs, dep);
 				return obj;
 			}
 			return null;
@@ -73,6 +70,17 @@ public class SellerDaoJDBC implements DaoInterface {
 		}
 	}
 
+	private Department instantiatiateDepartment(ResultSet rs) throws SQLException {
+		var dep = new Department(rs.getInt("DepartmentId"), rs.getString("DepName"));
+		return dep;
+	}
+
+	private Object instantiatiateSeller(ResultSet rs, Department dep) throws SQLException {
+		var obj = new Seller(rs.getInt("Id"), rs.getString("Name"), rs.getString("Email"),
+				rs.getDate("BirthDate"), rs.getDouble("BaseSalary"), dep);
+		return obj;
+	}
+	
 	@Override
 	public List<Object> findAll() {
 		// TODO Auto-generated method stub
