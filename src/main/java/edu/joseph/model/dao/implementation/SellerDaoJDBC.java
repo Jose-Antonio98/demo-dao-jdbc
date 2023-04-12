@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.joseph.db.Db;
 import edu.joseph.db.DbException;
@@ -75,7 +78,7 @@ public class SellerDaoJDBC implements DaoInterface {
 		return dep;
 	}
 
-	private Object instantiatiateSeller(ResultSet rs, Department dep) throws SQLException {
+	private Seller instantiatiateSeller(ResultSet rs, Department dep) throws SQLException {
 		var obj = new Seller(rs.getInt("Id"), rs.getString("Name"), rs.getString("Email"),
 				rs.getDate("BirthDate"), rs.getDouble("BaseSalary"), dep);
 		return obj;
@@ -85,6 +88,46 @@ public class SellerDaoJDBC implements DaoInterface {
 	public List<Object> findAll() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public List<Seller> findByDepartment(Department dept) {
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			// passa o camando para o BD
+			st = conn.prepareStatement(
+					"SELECT seller.* , department.Name as DepName FROM seller INNER JOIN department "
+					+ "ON seller.DepartmentId = Department.Id WHERE DepartmentId = ? ORDER BY Name");
+
+			st.setInt(1, dept.getId());
+			rs = st.executeQuery();
+
+			List<Seller> sellers = new ArrayList<>();
+			Map<Integer, Department> mapDepartment = new HashMap<>();
+			
+			//evita instanciar varios departamentos repetidos
+			while (rs.next()) {
+				
+				Department dep = mapDepartment.get(rs.getInt("DepartmentId"));
+				
+				if (dep == null) {
+					dep = instantiatiateDepartment(rs);
+					mapDepartment.put(rs.getInt("DepartmentId"), dep);
+				}
+				
+				// instancia o objeto pegando os itens contidos cons colunas e linhas do objeto rs
+				var obj = instantiatiateSeller(rs, dep);
+				sellers.add(obj);
+			}
+			return sellers;
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		}finally {
+			Db.closeStatement(st);
+			Db.closeresultSet(rs);
+		}
 	}
 
 }
