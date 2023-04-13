@@ -59,4 +59,14 @@ class SellerTests {
 		sellerDao.insert(newSeller);
 		System.out.println("Inseted! new Id: " + newSeller.getId());
 	}
+	
+	@Test
+	void testUpdate() {
+		System.out.println("Test 6");
+		DaoInterface sellerDao = DaoFactory.createSellerDao();
+		var seller = sellerDao.findById(9);
+		seller.setName("Bruce");
+		sellerDao.update(seller);
+		System.out.println("Update completed");
+	}
 }
