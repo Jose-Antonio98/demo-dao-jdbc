@@ -69,4 +69,11 @@ class SellerTests {
 		sellerDao.update(seller);
 		System.out.println("Update completed");
 	}
+	
+	@Test
+	void testDelete() {
+		System.out.println("Test 7");
+		DaoInterface sellerDao = DaoFactory.createSellerDao();
+		sellerDao.deleteById(12);
+	}
 }
