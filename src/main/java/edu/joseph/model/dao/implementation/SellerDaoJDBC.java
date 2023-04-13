@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,21 +26,46 @@ public class SellerDaoJDBC implements DaoInterface {
 	}
 
 	@Override
-	public void insert(Object obj) {
-		// TODO Auto-generated method stub
+	public void insert(Seller obj) {
+		PreparedStatement st = null;
 
+		try {
+			st = conn.prepareStatement("INSERT INTO seller " + "(Name, Email, BirthDate, BaseSalary, DepartmentId) "
+					+ "VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+
+			st.setString(1, obj.getName());
+			st.setString(2, obj.getEmail());
+			st.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+			st.setDouble(4, obj.getBaseSalary());
+			st.setInt(5, obj.getDepartment().getId());
+
+			int rowsAffected = st.executeUpdate();
+
+			if (rowsAffected > 0) {
+				ResultSet rs = st.getGeneratedKeys();
+				if (rs.next()) {
+					int id = rs.getInt(1);
+					obj.setId(id);
+				}
+				Db.closeresultSet(rs);
+			} else {
+				throw new DbException("Unespected error! No rows affected");
+			}
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			Db.closeStatement(st);
+		}
 	}
 
 	@Override
 	public void update(Object obj) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void deleteById(Integer id) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -59,7 +85,6 @@ public class SellerDaoJDBC implements DaoInterface {
 				// instancia o objeto department pegando os itens contidos cons colunas e linhas
 				// do objeto rs
 				var dep = instantiatiateDepartment(rs);
-				
 				var obj = instantiatiateSeller(rs, dep);
 				return obj;
 			}
@@ -67,7 +92,7 @@ public class SellerDaoJDBC implements DaoInterface {
 
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
-		}finally {
+		} finally {
 			Db.closeStatement(st);
 			Db.closeresultSet(rs);
 		}
@@ -79,38 +104,34 @@ public class SellerDaoJDBC implements DaoInterface {
 	}
 
 	private Seller instantiatiateSeller(ResultSet rs, Department dep) throws SQLException {
-		var obj = new Seller(rs.getInt("Id"), rs.getString("Name"), rs.getString("Email"),
-				rs.getDate("BirthDate"), rs.getDouble("BaseSalary"), dep);
+		var obj = new Seller(rs.getInt("Id"), rs.getString("Name"), rs.getString("Email"), rs.getDate("BirthDate"),
+				rs.getDouble("BaseSalary"), dep);
 		return obj;
 	}
-	
+
 	@Override
 	public List<Seller> findAll() {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
 			// passa o camando para o BD
-			st = conn.prepareStatement(
-					"SELECT seller.* , department.Name as DepName FROM seller INNER JOIN department "
+			st = conn.prepareStatement("SELECT seller.* , department.Name as DepName FROM seller INNER JOIN department "
 					+ "ON seller.DepartmentId = Department.Id ORDER BY Name");
-
-			
 			rs = st.executeQuery();
 
 			List<Seller> sellers = new ArrayList<>();
 			Map<Integer, Department> mapDepartment = new HashMap<>();
-			
-			//evita instanciar varios departamentos repetidos
+
+			// evita instanciar varios departamentos repetidos
 			while (rs.next()) {
-				
+
 				Department dep = mapDepartment.get(rs.getInt("DepartmentId"));
-				
+
 				if (dep == null) {
 					dep = instantiatiateDepartment(rs);
 					mapDepartment.put(rs.getInt("DepartmentId"), dep);
 				}
-				
-				// instancia o objeto pegando os itens contidos cons colunas e linhas do objeto rs
+
 				var obj = instantiatiateSeller(rs, dep);
 				sellers.add(obj);
 			}
@@ -118,7 +139,7 @@ public class SellerDaoJDBC implements DaoInterface {
 
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
-		}finally {
+		} finally {
 			Db.closeStatement(st);
 			Db.closeresultSet(rs);
 		}
@@ -129,9 +150,7 @@ public class SellerDaoJDBC implements DaoInterface {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			// passa o camando para o BD
-			st = conn.prepareStatement(
-					"SELECT seller.* , department.Name as DepName FROM seller INNER JOIN department "
+			st = conn.prepareStatement("SELECT seller.* , department.Name as DepName FROM seller INNER JOIN department "
 					+ "ON seller.DepartmentId = Department.Id WHERE DepartmentId = ? ORDER BY Name");
 
 			st.setInt(1, dept.getId());
@@ -139,18 +158,16 @@ public class SellerDaoJDBC implements DaoInterface {
 
 			List<Seller> sellers = new ArrayList<>();
 			Map<Integer, Department> mapDepartment = new HashMap<>();
-			
-			//evita instanciar varios departamentos repetidos
+
 			while (rs.next()) {
-				
+
 				Department dep = mapDepartment.get(rs.getInt("DepartmentId"));
-				
+
 				if (dep == null) {
 					dep = instantiatiateDepartment(rs);
 					mapDepartment.put(rs.getInt("DepartmentId"), dep);
 				}
-				
-				// instancia o objeto pegando os itens contidos cons colunas e linhas do objeto rs
+
 				var obj = instantiatiateSeller(rs, dep);
 				sellers.add(obj);
 			}
@@ -158,10 +175,9 @@ public class SellerDaoJDBC implements DaoInterface {
 
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
-		}finally {
+		} finally {
 			Db.closeStatement(st);
 			Db.closeresultSet(rs);
 		}
 	}
-
 }

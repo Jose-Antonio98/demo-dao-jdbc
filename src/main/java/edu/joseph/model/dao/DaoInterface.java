@@ -7,7 +7,7 @@ import edu.joseph.model.Seller;
 
 public interface DaoInterface {
 	
-	void insert (Object obj);
+	void insert (Seller obj);
 	void update(Object obj);
 	void deleteById(Integer id);
 	Object findById(Integer id);
